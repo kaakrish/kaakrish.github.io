@@ -3,124 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to My Blog</title>
+    <title>My Automated Blog</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: 'Roboto', sans-serif;
-            line-height: 1.6;
-            background: linear-gradient(to bottom right, #e3f2fd, #bbdefb);
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
             color: #333;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            overflow-x: hidden;
         }
 
         header {
-            background: rgba(33, 150, 243, 0.9);
+            background-color: #6200ea;
             color: #fff;
-            padding: 1.5rem 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             text-align: center;
-            margin-bottom: 2rem;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         header h1 {
-            font-size: 3rem;
-            margin-bottom: 0.5rem;
-        }
-
-        header p {
-            font-size: 1.2rem;
+            margin: 0;
         }
 
         .container {
-            max-width: 1200px;
-            width: 100%;
-            padding: 0 2rem;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
         }
 
-        .card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(10px);
-            margin: 1rem 0;
-            padding: 2rem;
-            border-radius: 16px;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        .post {
+            background-color: #fff;
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        .post h2 {
+            margin-top: 0;
+            color: #6200ea;
         }
 
-        .card h2 {
-            margin-bottom: 1rem;
-            font-size: 2rem;
-            color: #2196f3;
+        .post p {
+            line-height: 1.6;
         }
 
-        .card p {
-            font-size: 1.1rem;
-            color: #555;
-        }
-
-        footer {
+        .loading {
             text-align: center;
-            margin: 2rem 0;
-            font-size: 0.9rem;
-            color: #666;
+            font-size: 1.2rem;
+            color: #888;
         }
 
-        footer a {
-            color: #2196f3;
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
+        .error {
+            color: red;
+            text-align: center;
+            font-size: 1.2rem;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>Welcome to My Blog</h1>
+        <h1>My Automated Blog</h1>
         <p>Your daily dose of trending topics</p>
     </header>
 
     <div class="container">
-        <div class="card">
-            <h2>Trending Topic 1</h2>
-            <p>Discover insights and details about the hottest topic of the day. Stay informed and engaged!</p>
-        </div>
-
-        <div class="card">
-            <h2>Trending Topic 2</h2>
-            <p>Learn more about what's making headlines today. Dive deep into the world of trends and updates.</p>
-        </div>
-
-        <div class="card">
-            <h2>Trending Topic 3</h2>
-            <p>Explore the latest developments in this fascinating topic. Don't miss out on the buzz!</p>
-        </div>
+        <div id="loading" class="loading">Loading posts...</div>
+        <div id="error" class="error" style="display: none;">Failed to load posts. Please try again later.</div>
+        <div id="posts"></div>
     </div>
 
-    <footer>
-        <p>Powered by <a href="https://github.com">GitHub Pages</a>. Built with ♥ by You.</p>
-    </footer>
+    <script>
+        const BASE_URL = "https://your-app.onrender.com"; // Replace with your Render backend URL
+
+        async function fetchPosts() {
+            const loadingElement = document.getElementById("loading");
+            const errorElement = document.getElementById("error");
+            const postsContainer = document.getElementById("posts");
+
+            loadingElement.style.display = "block";
+            errorElement.style.display = "none";
+
+            try {
+                const response = await fetch(`${BASE_URL}/posts`);
+                if (!response.ok) throw new Error("Failed to fetch posts");
+
+                const data = await response.json();
+                loadingElement.style.display = "none";
+
+                if (data.posts && data.posts.length > 0) {
+                    postsContainer.innerHTML = data.posts
+                        .map(
+                            (post) => `
+                            <div class="post">
+                                <h2>${post.title || "Untitled"}</h2>
+                                <p>${post.content}</p>
+                                <small><em>${new Date(post.timestamp).toLocaleString()}</em></small>
+                            </div>
+                        `
+                        )
+                        .join("");
+                } else {
+                    postsContainer.innerHTML = "<p>No posts available at the moment.</p>";
+                }
+            } catch (error) {
+                console.error("Error fetching posts:", error);
+                loadingElement.style.display = "none";
+                errorElement.style.display = "block";
+            }
+        }
+
+        // Fetch posts on page load
+        window.onload = fetchPosts;
+    </script>
 </body>
 </html>
